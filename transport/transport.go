@@ -17,5 +17,6 @@ func New(proxies ...string) (*RoundTransport, error) {
 }
 
 func (rt *RoundTransport) Next() string {
-	return rt.Next()
+	next := rt.rb.Next()
+	return next.String()
 }

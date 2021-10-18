@@ -7,6 +7,10 @@ type Item struct {
 	Stats Stats
 }
 
+func (i Item) String() string {
+	return i.value
+}
+
 type Stats struct {
 	Count int32
 }
