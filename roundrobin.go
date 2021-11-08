@@ -32,6 +32,7 @@ func NewWithOptions(options Options, items ...string) (*RoundRobin, error) {
 
 	rb := &RoundRobin{itemsMap: make(map[string]struct{}), Options: options}
 	rb.Add(items...)
+	rb.next = 1
 
 	return rb, nil
 }
@@ -53,11 +54,16 @@ func (r *RoundRobin) Add(items ...string) {
 
 // Next returns next item
 func (r *RoundRobin) Next() Item {
-	currentAmount := atomic.AddUint32(&r.currentItemCount, 1)
-	if currentAmount > uint32(r.Options.RotateAmount) {
-		atomic.StoreUint32(&r.currentItemCount, 0)
+	currentAmount := atomic.LoadUint32(&r.currentItemCount)
+	if currentAmount >= uint32(r.Options.RotateAmount) {
+		atomic.StoreUint32(&r.currentItemCount, 1)
 		n := atomic.AddUint32(&r.next, 1)
 		return r.items[(int(n)-1)%len(r.items)]
 	}
-	return r.items[(int(r.next)-1)%len(r.items)]
+	nextItemIndex := (int(r.next) - 1) % len(r.items)
+	if nextItemIndex < 0 {
+		nextItemIndex = 0
+	}
+	atomic.AddUint32(&r.currentItemCount, 1)
+	return r.items[nextItemIndex]
 }
