@@ -57,13 +57,17 @@ func (r *RoundRobin) Next() Item {
 	currentAmount := atomic.LoadUint32(&r.currentItemCount)
 	if currentAmount >= uint32(r.Options.RotateAmount) {
 		atomic.StoreUint32(&r.currentItemCount, 1)
-		n := atomic.AddUint32(&r.next, 1)
-		return r.items[(int(n)-1)%len(r.items)]
-	}
-	nextItemIndex := (int(r.next) - 1) % len(r.items)
-	if nextItemIndex < 0 {
-		nextItemIndex = 0
+		atomic.AddUint32(&r.next, 1)
+		return r.getNextItem()
 	}
 	atomic.AddUint32(&r.currentItemCount, 1)
+	return r.getNextItem()
+}
+
+func (r *RoundRobin) getNextItem() Item {
+	nextItemIndex := (int(r.next) - 1) % len(r.items)
+	if nextItemIndex < 0 || nextItemIndex > len(r.items) {
+		return r.items[0]
+	}
 	return r.items[nextItemIndex]
 }
