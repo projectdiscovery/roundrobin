@@ -67,36 +67,3 @@ func TestRoundrobinWithRotate(t *testing.T) {
 		}
 	}
 }
-
-// func TestActionWaitVisible(t *testing.T) {
-// 	response := `
-// 		<html>
-// 			<head>
-// 				<title>Nuclei Test Page</title>
-// 			</head>
-// 			<button style="display:none" id="test">Wait for me!</button>
-// 			<script>
-// 				setTimeout(() => document.querySelector('#test').style.display = '', 1000);
-// 			</script>
-// 		</html>`
-
-// 	actions := []*Action{
-// 		{ActionType: ActionTypeHolder{ActionType: ActionNavigate}, Data: map[string]string{"url": "{{BaseURL}}"}},
-// 		{ActionType: ActionTypeHolder{ActionType: ActionWaitVisible}, Data: map[string]string{"by": "x", "xpath": "//button[@id='test']"}},
-// 	}
-
-// 	t.Run("wait for an element being visible", func(t *testing.T) {
-// 		testHeadlessSimpleResponse(t, response, actions, 2*time.Second, func(page *Page, err error, out map[string]string) {
-// 			require.Nil(t, err, "could not run page actions")
-
-// 			page.Page().MustElement("button").MustVisible()
-// 		})
-// 	})
-
-// 	t.Run("timeout because of element not visible", func(t *testing.T) {
-// 		testHeadlessSimpleResponse(t, response, actions, time.Second/2, func(page *Page, err error, out map[string]string) {
-// 			require.Error(t, err)
-// 			require.Contains(t, err.Error(), "Element did not appear in the given amount of time")
-// 		})
-// 	})
-// }
