@@ -1,7 +1,7 @@
 package transport
 
 import (
-	"github.com/Mzack9999/roundrobin"
+	"github.com/projectdiscovery/roundrobin"
 )
 
 type RoundTransport struct {
