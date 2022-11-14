@@ -20,7 +20,35 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Fetch Last Release Date
+        id: last_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Uses gh cli to fetch Last Release Date and filters using jq
+        run: |
+          gh release view  --json publishedAt --jq '.publishedAt' -R github.com/$GITHUB_REPOSITORY | xargs -I {} echo RDATE={} >> $GITHUB_OUTPUT
+
+      -  name: Count commits from Last Release Date
+         id: available_commits
+        # Count All Commits From Release Date and Handle edgecase where it is a first release
+         run: |
+          if ${{ steps.last_release.outputs.RDATE == '' }}
+          then
+              echo "Defaulting to 1 since this is a First Release"
+              echo COUNT=1 >> $GITHUB_OUTPUT
+          else 
+              echo "Last Release was on ${{ steps.last_release.outputs.RDATE }} "
+              git log --pretty=format:%an --since=${{ steps.last_release.outputs.RDATE }}  --oneline | wc -l | xargs -I {} echo COUNT={} >> $GITHUB_OUTPUT
+          fi
+
+      # Optional
+      # -  name: Log Available Commits
+      #    run: |
+      #      echo Total Available Commits ${{ steps.available_commits.outputs.COUNT }}
+
+
       - name: Create a GitHub release
+        if: ${{ steps.available_commits.outputs.COUNT > 0  }}
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
