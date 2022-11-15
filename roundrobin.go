@@ -67,7 +67,9 @@ func (r *RoundRobin) Next() Item {
 func (r *RoundRobin) getNextItem() Item {
 	nextItemIndex := (int(r.next) - 1) % len(r.items)
 	if nextItemIndex < 0 || nextItemIndex > len(r.items) {
+		r.items[0].Stats.Inc(1) // Increment stats by 1 everytime item is retrieved
 		return r.items[0]
 	}
+	r.items[nextItemIndex].Stats.Inc(1)
 	return r.items[nextItemIndex]
 }
