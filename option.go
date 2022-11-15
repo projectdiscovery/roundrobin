@@ -1,5 +1,6 @@
 package roundrobin
 
+// Options for RoundRobin
 type Options struct {
 	RotateAmount int32
 }
