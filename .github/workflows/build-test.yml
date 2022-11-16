@@ -21,6 +21,5 @@ jobs:
       - name: Test
         run: go test ./...
 
-      # TODO: create examples folder
-      # - name: Build
-      #   run: go build .
+      - name: Build
+        run: go build example/main.go
