@@ -4,6 +4,7 @@ package roundrobin
 
 import (
 	"errors"
+	"sync"
 	"sync/atomic"
 )
 
@@ -17,6 +18,7 @@ type RoundRobin struct {
 	items            []Item
 	next             uint32
 	currentItemCount uint32
+	mutex            sync.Mutex
 }
 
 // New returns a new RoundRobin structure
@@ -54,6 +56,9 @@ func (r *RoundRobin) Add(items ...string) {
 
 // Next returns next item
 func (r *RoundRobin) Next() Item {
+	defer r.mutex.Unlock()
+	r.mutex.Lock()
+
 	currentAmount := atomic.LoadUint32(&r.currentItemCount)
 	if currentAmount >= uint32(r.Options.RotateAmount) {
 		atomic.StoreUint32(&r.currentItemCount, 1)

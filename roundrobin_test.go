@@ -2,6 +2,7 @@ package roundrobin
 
 import (
 	"fmt"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -66,4 +67,36 @@ func TestRoundrobinWithRotate(t *testing.T) {
 			require.Equal(t, expected, next.String(), "i=%d c=%d", i, c)
 		}
 	}
+}
+
+func TestRoundrobinwithGoroutinesUsingStats(t *testing.T) {
+	roundRobin, err := New("a", "b", "c", "d")
+	require.Nil(t, err)
+
+	wg := sync.WaitGroup{}
+
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
+
+		go func(rbx *RoundRobin, wg *sync.WaitGroup) {
+			defer wg.Done()
+			for j := 0; j < 3; j++ {
+				rbx.Next()
+			}
+		}(roundRobin, &wg)
+	}
+
+	wg.Wait()
+
+	/*
+		In Roundrobin algo all items have same priority and
+		are assinged in circular order Hence test results for 100
+		access with 3 iterations from different goroutines should be
+		a=75,b=75,c=75,d=75
+	*/
+
+	for _, v := range roundRobin.items {
+		require.Equal(t, int32(75), v.Stats.Count, "Test Failed for item %v", v.value)
+	}
+
 }
